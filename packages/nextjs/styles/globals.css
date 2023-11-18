@@ -1,0 +1,152 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root,
+[data-theme] {
+  background: hsl(var(--b2));
+}
+
+body {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+p {
+  margin: 1rem 0;
+}
+
+.btn {
+  @apply shadow-md;
+}
+
+.btn.btn-ghost {
+  @apply shadow-none;
+}
+
+code {
+  @apply bg-gray-800 text-white border border-gray-200 rounded px-1.5 py-0.5;
+}
+
+a {
+  @apply text-purple-400 hover:text-purple-600 visited:text-gray-400 underline transition duration-200 ease-in-out;
+}
+
+img {
+  @apply rounded-md;
+}
+
+li {
+  @apply mb-2;
+}
+
+.grid {
+  position: relative;
+}
+
+.contract-data-fixed {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 40vw;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: -15px 0 30px #aeb8b080;
+}
+
+.instructions {
+  margin-left: 1vw;
+}
+
+.game-margin {
+  margin-top: 10%;
+}
+
+.negative-margin-top {
+  margin-top: -120px;
+}
+
+.flip-horizontal {
+  transform: scaleX(-1);
+}
+
+.flex-container {
+  display: flex;
+  align-items: flex-start;
+}
+
+.winner-image {
+  margin-top: 30px;
+  margin-left: 45px;
+}
+
+
+.screen-warning {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: 50px;
+  z-index: 100;
+}
+
+.flex-cover-viewport {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: rgb(42, 54, 85);
+  border-radius: 30px;
+  border-color: white;
+  border-width: 5px;
+}
+
+@media screen and (max-width: 1025px) {
+  .screen-warning {
+    display: block;
+  }
+
+  .heroimg {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    transform: scale(0.8);
+  }
+
+  .grassland {
+    margin: 5px;
+    padding: 20px;
+    height: auto;
+    width: calc(100% - 10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .halloffame{
+    margin: 5px;
+    padding: 5px;
+    height: auto;
+    width: calc(100% - 10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+}
