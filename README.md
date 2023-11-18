@@ -1,4 +1,4 @@
-![SpeedRun Golf Logo](https://raw.githubusercontent.com/Astronaut828/SpeedRunGolf/main/packages/nextjs/public/thumbnail.jpg?token=GHSAT0AAAAAACKPLIJWP36SICVKM367GV3SZKZFNBQ)
+![SpeedRun Golf Logo](https://raw.githubusercontent.com/Astronaut828/SpeedRunGolf/main/packages/nextjs/public/thumbnail.jpg)
 
 
 # 🏌️ SpeedRun Golf ⛳️
