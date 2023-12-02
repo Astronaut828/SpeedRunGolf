@@ -14,5 +14,5 @@ Each virtual swing brings you closer to understanding the intriguing world of Et
 ## Requirements
 To jump into the game, you'll need just two things: a digital wallet and a bit of Sepolia ETH (no more than 1 ETH).
 
-# Play @
+# To play, visit 👇
 ## https://speedrungolf.vercel.app/
