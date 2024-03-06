@@ -1,22 +1,16 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-// Useful for debugging. Remove when deploying to a live network.
-// import "hardhat/console.sol";
-
-// Use openzeppelin to inherit battle-tested implementations (ERC20, ERC721, etc)
-import "@openzeppelin/contracts/access/Ownable.sol";
-
 /**
- * A smart contract that allows changing a state variable of the contract and tracking the changes
- * It also allows the owner to withdraw the Ether in the contract
- * @author BuidlGuidl / Astronaut828
+ * @title SpeedRunGolf Contract
+ * @dev Implements payment and scoring logic for a SpeedRunGolf game
+ * @author Astronaut828
  */
 contract YourContract {
 	// State variables
 	address private _owner;
-	uint public gamesPlayed;
-	uint immutable PAR_SHOTS = 9;
+	uint256 public gamesPlayed;
+	uint8 immutable PAR_SHOTS = 9;
 	address[] private inductedAddresses;
 
 	// Events
@@ -37,7 +31,7 @@ contract YourContract {
 		_;
 	}
 
-	// Structs / Mappings
+	// Structs / Mappings for player data and Hall of Fame entries
 	struct Player {
 		bool hasPaidGreenFee;
 		bool scoreCommitted;
@@ -58,6 +52,9 @@ contract YourContract {
 		_owner = msg.sender;
 	}
 
+    /**
+	 * @dev Allows a player to pay the green fee to start playing
+	 */
 	function payGreensFee() public payable {
 		require(
 			!players[msg.sender].hasPaidGreenFee,
@@ -67,6 +64,9 @@ contract YourContract {
 		players[msg.sender].hasPaidGreenFee = true;
 	}
 
+    /**
+     * @dev Records shots made by the player
+     */
 	function makeShot() public payable {
 		require(players[msg.sender].hasPaidGreenFee, "Greens fee not paid");
 		require(msg.value >= 0.01 ether, "SEND SOME ETH!");
@@ -80,20 +80,33 @@ contract YourContract {
 		players[msg.sender].shots += 1;
 	}
 
+	/**
+	 * @dev Checks if a player has paid the green fee
+	 * @return bool representing payment status
+	 */
 	function greensFeePayed(address _player) public view returns (bool) {
 		return players[_player].hasPaidGreenFee;
 	}
 
+	/**
+	 * @dev Returns the balance of a player
+	 */
 	function playedBalance(
 		address playerAddress
 	) public view returns (uint256) {
 		return players[playerAddress].balance;
 	}
 
+    /**
+     * @dev Returns the number of shots made by a player
+     */
 	function shotsMade(address playerAddress) public view returns (uint256) {
 		return players[playerAddress].shots;
 	}
 
+	/**
+	 * @dev Commits a player's score, preventing further shots
+	 */
 	function commitScore() public {
 		require(
 			players[msg.sender].hasPaidGreenFee,
@@ -107,6 +120,10 @@ contract YourContract {
 		players[msg.sender].scoreCommitted = true;
 	}
 
+    /**
+     * @dev Determines the score based on the number of shots and balance
+     * @return string representing the player's score
+     */
 	function score(
 		address playerAddress
 	) public view commitedScore(playerAddress) returns (string memory) {
@@ -132,6 +149,9 @@ contract YourContract {
 		return "TRY AGAIN!";
 	}
 
+    /**
+     * @dev Inducts a player into the Hall of Fame if conditions are met
+     */
 	function enterHallOfFame(string memory playerName) public {
 		uint256 playerShots = players[msg.sender].shots;
 		bool isHoleInOne = (playerShots == PAR_SHOTS &&
@@ -150,6 +170,9 @@ contract YourContract {
 		emit PlayerInductedToHallOfFame(msg.sender, playerName);
 	}
 
+    /**
+     * @dev Returns all names in the Hall of Fame
+     */
 	function getAllNames() public view returns (string[] memory) {
 		string[] memory names = new string[](inductedAddresses.length);
 		for (uint i = 0; i < inductedAddresses.length; i++) {
@@ -158,13 +181,17 @@ contract YourContract {
 		return names;
 	}
 
+    /**
+     * @dev Allows a player to withdraw their balance
+     */
 	function withdrawPlayerBalance() public {
 		uint amount = players[msg.sender].balance;
 		require(amount > 0, "No amount to withdraw");
-		payable(msg.sender).transfer(amount);
-
 		// Reset player's status
 		delete players[msg.sender];
+
+		// Then transfer Ether to the player
+		payable(msg.sender).transfer(amount);
 
 		// Game played counter
 		gamesPlayed += 1;
@@ -172,7 +199,9 @@ contract YourContract {
 		emit GameReset(msg.sender);
 	}
 
-	// Owner withdraw function / for green fees
+    /**
+     * @dev Allows the owner to withdraw all Ether collected from green fees
+     */
 	function ownerWithdraw() external onlyOwner {
 		payable(_owner).transfer(address(this).balance);
 	}
