@@ -8,21 +8,40 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 contract YourContract {
 	// State variables
+	/// @notice Owner of the contract, set to the deployer.
 	address private _owner;
+
+	/// @notice Counter for the number of games played.
 	uint256 public gamesPlayed;
+
+	/// @notice The standard number of shots considered par for the game.
 	uint8 immutable PAR_SHOTS = 9;
+
+	/// @notice List of addresses inducted into the Hall of Fame.
 	address[] private inductedAddresses;
 
 	// Events
+	/**
+	* @notice Emitted when a game is reset.
+    * @param player The address of the player whose game is reset.
+	*/
 	event GameReset(address indexed player);
+
+	/**
+	* @notice Emitted when a player is inducted into the Hall of Fame.
+    * @param player The address of the inducted player.
+    * @param name The name of the inducted player.
+	*/
 	event PlayerInductedToHallOfFame(address indexed player, string name);
 
 	// Modifiers
+	/// @notice Ensures that the function is called by the owner of the contract.
 	modifier onlyOwner() {
 		require(msg.sender == _owner, "Not the owner");
 		_;
 	}
 
+	/// @notice Ensures that a player's score has been committed before allowing access to certain functions.
 	modifier commitedScore(address playerAddress) {
 		require(
 			players[playerAddress].scoreCommitted,
@@ -32,6 +51,7 @@ contract YourContract {
 	}
 
 	// Structs / Mappings for player data and Hall of Fame entries
+	/// @notice Represents a player in the game, tracking payment status, score commitment, balance, and shots made.
 	struct Player {
 		bool hasPaidGreenFee;
 		bool scoreCommitted;
@@ -39,22 +59,30 @@ contract YourContract {
 		uint256 shots;
 	}
 
+	/// @notice Represents an entry in the Hall of Fame, including the player's name and induction status.
 	struct HallOfFameEntry {
 		string name;
 		bool inducted;
 	}
 
+	/// @dev Mapping of player addresses to their respective player data.
 	mapping(address => Player) private players;
+
+	/// @notice Mapping of player addresses to their Hall of Fame entries.
 	mapping(address => HallOfFameEntry) public hallOfFameEntries;
+
+	/// @notice Tracks whether a player address has been inducted into the Hall of Fame.
 	mapping(address => bool) public isInducted;
 
+	/// @notice Sets the contract deployer as the owner upon contract creation.
 	constructor() {
 		_owner = msg.sender;
 	}
 
-    /**
-	 * @dev Allows a player to pay the green fee to start playing
-	 */
+	/**
+     * @notice Allows a player to pay the green fee and start playing.
+     * @dev The green fee is set to 0.02 ETH. Throws an error if the fee is already paid or the sent value is incorrect.
+     */
 	function payGreensFee() public payable {
 		require(
 			!players[msg.sender].hasPaidGreenFee,
@@ -65,7 +93,8 @@ contract YourContract {
 	}
 
     /**
-     * @dev Records shots made by the player
+     * @notice Records a shot made by the player and requires a payment of 0.01 ETH per shot.
+     * @dev Updates the player's balance and shot count. Throws an error if the greens fee hasn't been paid, the score is already committed, or the sent value is to low.
      */
 	function makeShot() public payable {
 		require(players[msg.sender].hasPaidGreenFee, "Greens fee not paid");
@@ -80,17 +109,20 @@ contract YourContract {
 		players[msg.sender].shots += 1;
 	}
 
-	/**
-	 * @dev Checks if a player has paid the green fee
-	 * @return bool representing payment status
-	 */
+    /**
+     * @notice Checks if a player has paid the green fee.
+     * @param _player The address of the player whose payment status is being checked.
+     * @return bool Returns true if the green fee has been paid, otherwise false.
+     */
 	function greensFeePayed(address _player) public view returns (bool) {
 		return players[_player].hasPaidGreenFee;
 	}
 
-	/**
-	 * @dev Returns the balance of a player
-	 */
+    /**
+     * @notice Returns the current balance of a player. This balance accumulates from making shots.
+     * @param playerAddress The address of the player whose balance is being queried.
+     * @return uint256 The current balance of the player in wei.
+     */
 	function playedBalance(
 		address playerAddress
 	) public view returns (uint256) {
@@ -98,15 +130,18 @@ contract YourContract {
 	}
 
     /**
-     * @dev Returns the number of shots made by a player
+     * @notice Returns the total number of shots made by a player.
+     * @param playerAddress The address of the player whose shot count is being queried.
+     * @return uint256 The total number of shots made by the player.
      */
 	function shotsMade(address playerAddress) public view returns (uint256) {
 		return players[playerAddress].shots;
 	}
 
-	/**
-	 * @dev Commits a player's score, preventing further shots
-	 */
+    /**
+     * @notice Commits a player's score, preventing further shots from being made. This action finalizes the player's participation in the current game.
+     * @dev Requires that the player has paid the green fee and made at least one shot. Throws an error if these conditions are not met.
+     */
 	function commitScore() public {
 		require(
 			players[msg.sender].hasPaidGreenFee,
@@ -121,8 +156,9 @@ contract YourContract {
 	}
 
     /**
-     * @dev Determines the score based on the number of shots and balance
-     * @return string representing the player's score
+     * @notice Calculates and returns the player's score based on the number of shots made and the player's current balance.
+     * @param playerAddress The address of the player whose score is being calculated.
+     * @return string A message indicating the player's score or encouraging them to try again.
      */
 	function score(
 		address playerAddress
@@ -150,7 +186,9 @@ contract YourContract {
 	}
 
     /**
-     * @dev Inducts a player into the Hall of Fame if conditions are met
+     * @notice Inducts a player into the Hall of Fame if they meet the criteria for a "hole-in-one" performance.
+     * @param playerName The name of the player being inducted.
+     * @dev Requires the player to have made exactly PAR_SHOTS and to have a balance indicating a "hole-in-one". Throws an error if the player does not meet these criteria or is already inducted.
      */
 	function enterHallOfFame(string memory playerName) public {
 		uint256 playerShots = players[msg.sender].shots;
@@ -171,7 +209,8 @@ contract YourContract {
 	}
 
     /**
-     * @dev Returns all names in the Hall of Fame
+     * @notice Retrieves the names of all players inducted into the Hall of Fame.
+     * @return string[] An array of names of all inducted players.
      */
 	function getAllNames() public view returns (string[] memory) {
 		string[] memory names = new string[](inductedAddresses.length);
@@ -182,7 +221,8 @@ contract YourContract {
 	}
 
     /**
-     * @dev Allows a player to withdraw their balance
+     * @notice Allows a player to withdraw their accumulated balance. This resets the player's status for future games.
+     * @dev Ensures the player has a balance to withdraw. The player's data is reset and balance is transferred to the player's address.
      */
 	function withdrawPlayerBalance() public {
 		uint amount = players[msg.sender].balance;
@@ -200,7 +240,8 @@ contract YourContract {
 	}
 
     /**
-     * @dev Allows the owner to withdraw all Ether collected from green fees
+     * @notice Allows the owner of the contract to withdraw all Ether collected from green fees. 
+     * @dev Can only be called by the owner of the contract. Transfers the contract's entire Ether balance to the owner.
      */
 	function ownerWithdraw() external onlyOwner {
 		payable(_owner).transfer(address(this).balance);
